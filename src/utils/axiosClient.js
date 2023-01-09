@@ -40,13 +40,17 @@ axiosClient.interceptors.response.use(async (respone) => {
 
     if (statusCode === 401 && !originalRequest._retry) { // means the access token has expired
         originalRequest._retry = true;
-        const response = await axiosClient.get("/auth/refresh");
 
-        if (response.status === "ok") {
-            setItem(KEY_ACCESS_TOKEN, response.result.accessToken);
+        const response = await axios.create({
+            withCredentials: true,
+        }).get(`${process.env.REACT_APP_SERVER_BASE_URL}/auth/refresh`)
+
+
+        if (response.data.status === "ok") {
+            setItem(KEY_ACCESS_TOKEN, response.data.result.accessToken);
             originalRequest.headers[
                 "Authorization"
-            ] = `Bearer ${response.result.accessToken}`;
+            ] = `Bearer ${response.data.result.accessToken}`;
 
             return axios(originalRequest);
         }
